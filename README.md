@@ -1,7 +1,7 @@
 # Car Dealership Database Management - Advanced Features
 
 ## Overview  
-This project builds upon a SQL-based car dealership database by adding **procedural SQL (PL/SQL) features** and **MongoDB integration** for extended functionality.
+This project builds upon the SQL-based car dealership database by adding **procedural SQL (PL/SQL) features** and **MongoDB integration** for extended functionality.
 
 ## Project Structure  
 - Package.txt → Defines and implements the PL/SQL package (pkg_vanzari).
@@ -31,18 +31,6 @@ Encapsulates business logic through:
 - NoSQL collections for vehicle sales, inventory, and employees.  
 - Efficient queries for dealership data retrieval.  
 
-## **How to Run**  
+# How to run
+In order to run the program, you will need to download a tool that can execute SQL scripts, such as SQLite or DB Browser (provides a graphical interface). You then need to clone the files in this repo and then run create_alter_tables.sql and then populate_tables.sql. In order to see the views, and queries, you need to run them separately.
 
-### **SQL Execution**  
-1. Use an SQL tool (e.g., Oracle SQL Developer).  
-2. Run `CRUD_initial.txt` followed by `CRUD_additional.txt`.  
-3. Execute `Package.txt`, `Triggers.txt`, and `Sequence.txt`.  
-4. Use `Queries.txt` for reporting and retrieval.  
-
-### **MongoDB Execution**  
-1. Install and start MongoDB.  
-2. Run `MongoDB.js` in the MongoDB shell.  
-3. Query collections using `find()`.  
-
-## **Conclusion**  
-This project improves **automation, security, and performance** in dealership database management using **procedural SQL and NoSQL approaches**.
