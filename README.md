@@ -13,7 +13,7 @@ This project builds upon a SQL-based car dealership database by adding **procedu
 
 ## Features  
 
-### **PL/SQL Package (`pkg_vanzari`)**  
+### **PL/SQL Package**  
 Encapsulates business logic through:  
 - **Procedures** for adding clients and recording sales.  
 - **Functions** for sales reporting and purchase history retrieval.  
