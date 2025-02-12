@@ -33,4 +33,5 @@ Encapsulates business logic through:
 
 # How to run
 In order to run the program, you will need to download a tool that can execute SQL scripts, such as SQLite or DB Browser (provides a graphical interface). You then need to clone the files in this repo and then run create_alter_tables.sql and then populate_tables.sql. In order to see the views, and queries, you need to run them separately.
+In order to run the MongoDB code, you will need to install a tool such as MongoDB Compass.
 
