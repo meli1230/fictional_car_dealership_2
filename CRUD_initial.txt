@@ -1,0 +1,233 @@
+-- DEPARTAMENTE
+-- Create
+CREATE TABLE p_departamente
+(
+    numar NUMBER(2) PRIMARY KEY CHECK (numar BETWEEN 8 AND 88), 
+    denumire VARCHAR2(30) NOT NULL UNIQUE
+);
+
+-- Populate
+INSERT ALL
+    INTO p_departamente VALUES (10, 'Aube')
+    INTO p_departamente VALUES (51, 'Marne')
+    INTO p_departamente VALUES (8, 'Ardennes')
+    INTO p_departamente VALUES (55, 'Meuse')
+    INTO p_departamente VALUES (52, 'Haute-Marne')
+    INTO p_departamente VALUES (54, 'Meurthe-et-Moselle')
+    INTO p_departamente VALUES (57, 'Moselle')
+    INTO p_departamente VALUES (88, 'Vosges')
+    INTO p_departamente VALUES (67, 'Haut-Rhin')
+    INTO p_departamente VALUES (68, 'Bas-Rhin')
+SELECT 1 FROM DUAL;
+
+-- Check
+SELECT * FROM p_departamente;
+
+
+
+-- ORASE
+-- Create
+CREATE TABLE p_orase
+(
+    cod VARCHAR2(5) PRIMARY KEY, 
+    denumire VARCHAR2(25) NOT NULL UNIQUE, 
+    numar_dpt NUMBER(2) NOT NULL REFERENCES p_departamente(numar) ON DELETE CASCADE -- added ON DELETE CASCADE
+);     
+
+-- Populate
+INSERT ALL
+    INTO p_orase VALUES ('TRO', 'Troyes', 10)
+    INTO p_orase VALUES ('CHAL', 'Chalons-en-Champagne', 51)
+    INTO p_orase VALUES ('CHARL', 'Charleville Mezieres', 8)
+    INTO p_orase VALUES ('VOUZ', 'Vouziers', 8)
+    INTO p_orase VALUES ('BAR', 'Bar-le-Duc', 55)
+    INTO p_orase VALUES ('CHAU', 'Chaumont', 52)
+    INTO p_orase VALUES ('NAN', 'Nancy', 54)
+    INTO p_orase VALUES ('MTZ', 'Metz', 57)
+    INTO p_orase VALUES ('EPIN', 'Epinal', 88)
+    INTO p_orase VALUES ('COL', 'Colmar', 67)
+    INTO p_orase VALUES ('MLH', 'Mulhouse', 67)
+    INTO p_orase VALUES ('STRAS', 'Strasbourg', 68)
+SELECT 1 FROM DUAL;
+
+-- Check
+SELECT * FROM p_orase;
+
+
+
+-- CLIENTI
+-- Create
+CREATE TABLE p_clienti
+(
+    cod NUMBER(5) PRIMARY KEY,
+    persoana VARCHAR2(8) NOT NULL CHECK(persoana IN ('juridica', 'fizica')),
+    nume VARCHAR2(20) NOT NULL,
+    prenume VARCHAR2(20) NOT NULL,
+    email VARCHAR2(35) NOT NULL,
+    adresa VARCHAR2(35) NOT NULL,
+    nr_telefon CHAR(12) NOT NULL,
+    cod_postal NUMBER(5) NOT NULL,
+    cod_ors VARCHAR2(5) NOT NULL REFERENCES p_orase(cod) ON DELETE CASCADE -- added ON DELETE CASCADE
+);
+
+-- Check
+DESCRIBE p_clienti;
+
+
+
+-- REPREZENTANTE
+-- Create
+CREATE TABLE p_reprezentante
+(
+    cod CHAR(3) PRIMARY KEY,
+    denumire VARCHAR2(20) NOT NULL, 
+    adresa VARCHAR2(35) NOT NULL,
+    cod_postal NUMBER(5) NOT NULL,
+    nr_telefon VARCHAR2(12) NOT NULL
+);
+
+-- Populate
+INSERT ALL
+    INTO p_reprezentante VALUES ('ATA', 'Aube Toyota', '98 Rue de la Contrefacon', 10000, '+33354956283')
+    INTO p_reprezentante VALUES ('MAO', 'Marne Auto', '12 Rue des Fleurs', 54000, '+33356985402')
+    INTO p_reprezentante VALUES ('ADS', 'Ardennes Motors', '46 Avenue des Champs', 08000, '+33356854261')
+    INTO p_reprezentante VALUES ('MAS', 'Meuse Automobiles', '78 Rue des Chenes', 55000, '+33326512403')
+    INTO p_reprezentante VALUES ('HMR', 'Haute-Marne Cars', '101 Place des Etoiles', 52000, '+33326150142')
+    INTO p_reprezentante VALUES ('MMR', 'Meurthe Motors', '21 Boulevard des Lilas', 52000, '+33365210524')
+    INTO p_reprezentante VALUES ('MAR', 'Moselle Auto Center', '34 Rue des Roses', 57000, '+33362542102')
+    INTO p_reprezentante VALUES ('VTA', 'Vosges Toyota', '42 Rue des Sapins', 88000, '+33312015640')
+    INTO p_reprezentante VALUES ('HRR', 'Haut Rhin Motors', '5 Avenue des Vignes', 68000, '+33312504652')
+    INTO p_reprezentante VALUES ('BRS', 'Bas Rhin Autohaus', '98 Place des Ormes', 67000, '+33325162482')
+    INTO p_reprezentante VALUES ('HRA', 'Haut Rhin Toyota', '1 Rue des Oliviers', 68000, '+33125015632')
+SELECT 1 FROM DUAL;
+
+-- Check
+SELECT * FROM p_reprezentante;
+
+
+
+-- AUTOVEHICULE
+-- Create
+CREATE TABLE p_autovehicule
+(
+    serie_sasiu VARCHAR2(17) PRIMARY KEY,
+    model_auto VARCHAR2(10) NOT NULL,
+    an_productie DATE NOT NULL,
+    echipare VARCHAR2(9) NOT NULL CHECK (echipare IN ('Active', 'Dynamic', 'Exclusive')), 
+    pret_vanzare NUMBER(6) NOT NULL,
+    culoare VARCHAR2(25) NOT NULL,
+    transmisie CHAR(1) NOT NULL CHECK (transmisie IN ('A', 'M')),
+    putere NUMBER(3) NOT NULL,
+    cuplu NUMBER(3) NOT NULL,
+    dim_anvelope VARCHAR2(15) NOT NULL,
+    tip VARCHAR2(10) NOT NULL CHECK (tip IN('SUV', 'Hatchback', 'Sedan', 'Crossover')),
+    autonomie NUMBER(4) NOT NULL,
+    data_disponibilitate DATE NOT NULL, 
+    capacitate_baterie NUMBER(3,1),
+    consum_mediu NUMBER(2,1),
+    motorizare NUMBER(2,1),
+    indice_euro NUMBER(1) CHECK (indice_euro BETWEEN 1 AND 6),
+    tip_carburant VARCHAR2(10), 
+    status VARCHAR2(10) DEFAULT 'in stoc' CHECK (status IN ('in stoc', 'vandut')),  -- added status
+    cod_rpa CHAR(3) NOT NULL REFERENCES p_reprezentante(cod) ON DELETE CASCADE -- added ON DELETE CASCADE
+);
+
+-- Populate hybrids
+INSERT ALL
+    INTO p_autovehicule (serie_sasiu, model_auto, an_productie, echipare, pret_vanzare, culoare, transmisie, putere, cuplu, dim_anvelope, tip, autonomie, data_disponibilitate, capacitate_baterie, consum_mediu, motorizare, indice_euro, tip_carburant, cod_rpa)
+        VALUES ('ASDW5496825643520', 'Yaris', TO_DATE('2020', 'YYYY'), 'Dynamic', 22500, 'Ruby Flare Pearl', 'A', 116, 120, '195/50 R16', 'Hatchback', 800, TO_DATE('11/09/2025', 'DD/MM/YYYY'), 1.5, 4, 1.5, 6, 'Benzina', 'ADS')
+    INTO p_autovehicule (serie_sasiu, model_auto, an_productie, echipare, pret_vanzare, culoare, transmisie, putere, cuplu, dim_anvelope, tip, autonomie, data_disponibilitate, capacitate_baterie, consum_mediu, motorizare, indice_euro, tip_carburant, cod_rpa)
+        VALUES ('ODUE4592635978421', 'RAV4', TO_DATE('2021', 'YYYY'), 'Active', 35000, 'Lunar Rock', 'A', 218, 221, '235/55 R19', 'SUV', 1000, TO_DATE('11/09/2024', 'DD/MM/YYYY'), 2.5, 5, 2.5, 6, 'Benzina', 'MMR')
+    INTO p_autovehicule (serie_sasiu, model_auto, an_productie, echipare, pret_vanzare, culoare, transmisie, putere, cuplu, dim_anvelope, tip, autonomie, data_disponibilitate, capacitate_baterie, consum_mediu, motorizare, indice_euro, tip_carburant, cod_rpa)
+        VALUES ('ADDE5468259536521', 'C-HR', TO_DATE('2023', 'YYYY'), 'Exclusive', 35000, 'Black', 'A', 220, 142, '225/60 R17', 'Crossover', 800, TO_DATE('15/07/2026', 'DD/MM/YYYY'), 5, 4.5, 2, 6, 'Benzina', 'HMR')
+    INTO p_autovehicule (serie_sasiu, model_auto, an_productie, echipare, pret_vanzare, culoare, transmisie, putere, cuplu, dim_anvelope, tip, autonomie, data_disponibilitate, capacitate_baterie, consum_mediu, motorizare, indice_euro, tip_carburant, cod_rpa)
+        VALUES ('PGIR4582165982365', 'Camry', TO_DATE('2022', 'YYYY'), 'Dynamic', 42000, 'Super White', 'A', 230, 220, '235/45 R18', 'Sedan', 700, TO_DATE('20/08/2025', 'DD/MM/YYYY'), 6.5, 4.9, 2, 6, 'Benzina', 'BRS')
+    INTO p_autovehicule (serie_sasiu, model_auto, an_productie, echipare, pret_vanzare, culoare, transmisie, putere, cuplu, dim_anvelope, tip, autonomie, data_disponibilitate, capacitate_baterie, consum_mediu, motorizare, indice_euro, tip_carburant, cod_rpa)
+        VALUES ('OVGD5489602135012', 'C-HR', TO_DATE('2023', 'YYYY'), 'Exclusive', 45000, 'Midnight Black Metallic', 'A', 202, 215, '235/60 R18', 'Crossover', 750, TO_DATE('05/04/2025', 'DD/MM/YYYY'), 8, 5.1, 2, 6, 'Benzina', 'HRR')
+    INTO p_autovehicule (serie_sasiu, model_auto, an_productie, echipare, pret_vanzare, culoare, transmisie, putere, cuplu, dim_anvelope, tip, autonomie, data_disponibilitate, capacitate_baterie, consum_mediu, motorizare, indice_euro, tip_carburant, cod_rpa)
+        VALUES ('PIII8549652365022', 'RAV4', TO_DATE('2024', 'YYYY'), 'Active', 48000, 'Blueprint', 'A', 176, 220, '235/65 R17', 'SUV', 800, TO_DATE('06/04/2026', 'DD/MM/YYYY'), 6.5, 5, 1.8, 6, 'Benzina', 'HRR')
+SELECT 1 FROM DUAL;
+
+-- Populate standard
+INSERT ALL
+    INTO p_autovehicule (serie_sasiu, model_auto, an_productie, echipare, pret_vanzare, culoare, transmisie, putere, cuplu, dim_anvelope, tip, autonomie, data_disponibilitate, consum_mediu, motorizare, indice_euro, tip_carburant, cod_rpa)
+        VALUES ('JSHA4582163542546', 'Corolla', TO_DATE('2019', 'YYYY'), 'Exclusive', 25000, 'Blueprint', 'M', 132, 160, '205/55 R16', 'Sedan', 520, TO_DATE('01/01/2025', 'DD/MM/YYYY'), 6.5, 1.6, 6, 'Benzina', 'ADS')
+    INTO p_autovehicule (serie_sasiu, model_auto, an_productie, echipare, pret_vanzare, culoare, transmisie, putere, cuplu, dim_anvelope, tip, autonomie, data_disponibilitate, consum_mediu, motorizare, indice_euro, tip_carburant, cod_rpa)
+        VALUES ('AORJ5246358154692', 'C-HR', TO_DATE('2023', 'YYYY'), 'Active', 33000, 'Supersonic Red', 'M', 120, 250, '215/60 R17', 'Crossover', 700, TO_DATE('20/04/2026', 'DD/MM/YYYY'), 5, 1.4, 6, 'Motorina', 'MAR')
+    INTO p_autovehicule (serie_sasiu, model_auto, an_productie, echipare, pret_vanzare, culoare, transmisie, putere, cuplu, dim_anvelope, tip, autonomie, data_disponibilitate, consum_mediu, motorizare, indice_euro, tip_carburant, cod_rpa)
+        VALUES ('OVUY4857962352501', 'RAV4', TO_DATE('2022', 'YYYY'), 'Dynamic', 40000, 'Black', 'M', 203, 243, '235/60 R18', 'SUV', 550, TO_DATE('05/05/2026', 'DD/MM/YYYY'), 8.2, 1.6, 6, 'Motorina', 'HRA')
+    INTO p_autovehicule (serie_sasiu, model_auto, an_productie, echipare, pret_vanzare, culoare, transmisie, putere, cuplu, dim_anvelope, tip, autonomie, data_disponibilitate, consum_mediu, motorizare, indice_euro, tip_carburant, cod_rpa)
+        VALUES ('FISH4859645236502', 'Yaris', TO_DATE('2021', 'YYYY'), 'Active', 25000, 'Supersonic Red', 'A', 95, 190, '185/60 R15', 'Hatchback', 800, TO_DATE('06/10/2026', 'DD/MM/YYYY'), 4, 1.2, 6, 'Motorina', 'ATA')
+SELECT 1 FROM DUAL;
+
+-- Populate electrics
+INSERT ALL
+    INTO p_autovehicule (serie_sasiu, model_auto, an_productie, echipare, pret_vanzare, culoare, transmisie, putere, cuplu, dim_anvelope, tip, autonomie, data_disponibilitate, capacitate_baterie, cod_rpa)
+        VALUES ('AOSD1245649865320', 'bZ4X', TO_DATE('2023', 'YYYY'), 'Exclusive', 45000, 'Super White', 'A', 201, 220, '225/60 R17', 'SUV', 300, TO_DATE('05/01/2026', 'DD/MM/YYYY'), 71.4, 'MAS')
+    INTO p_autovehicule (serie_sasiu, model_auto, an_productie, echipare, pret_vanzare, culoare, transmisie, putere, cuplu, dim_anvelope, tip, autonomie, data_disponibilitate, capacitate_baterie, cod_rpa)
+        VALUES ('NMTD5485936482514', 'RAV4 EV', TO_DATE('2022', 'YYYY'), 'Dynamic', 48000, 'Midnight Black Metallic', 'A', 218, 221, '235/65 R17', 'SUV', 320, TO_DATE('10/02/2026', 'DD/MM/YYYY'), 78, 'VTA')
+    INTO p_autovehicule (serie_sasiu, model_auto, an_productie, echipare, pret_vanzare, culoare, transmisie, putere, cuplu, dim_anvelope, tip, autonomie, data_disponibilitate, capacitate_baterie, cod_rpa)
+        VALUES ('CURB5682549685214', 'Prius', TO_DATE('2024', 'YYYY'), 'Active', 42000, 'Super White', 'A', 150, 200, '195/65 R15', 'Hatchback', 250, TO_DATE('15/03/2024', 'DD/MM/YYYY'), 60, 'HRR')
+SELECT 1 FROM DUAL;
+
+-- Check
+SELECT * FROM p_autovehicule;
+
+
+
+-- VANZARI
+-- Create
+CREATE TABLE p_vanzari
+(
+    nr_factura NUMBER(4),
+    data_ora DATE,
+    tip_plata CHAR(8) NOT NULL CHECK (tip_plata IN ('Integral', 'Rate')),
+    reducere NUMBER(4,2),
+    cod_cet NUMBER(5) NOT NULL REFERENCES p_clienti(cod),
+    serie_sasiu_aul VARCHAR2(17) NOT NULL REFERENCES p_autovehicule(serie_sasiu),
+    PRIMARY KEY (nr_factura, data_ora)
+);
+
+-- Check
+DESCRIBE p_vanzari;
+
+
+
+-- ANGAJATI
+-- Create
+CREATE TABLE p_angajati
+(
+    cod NUMBER(4) PRIMARY KEY,
+    nume VARCHAR2(20) NOT NULL,
+    prenume VARCHAR2(20) NOT NULL,
+    salar NUMBER(5) NOT NULL,
+    data_ang DATE NOT NULL,
+    tip_ang CHAR(8) NOT NULL,
+    bonus NUMBER(4),
+    cod_ors VARCHAR2(5) NOT NULL REFERENCES p_orase(cod), 
+    cod_rpa CHAR(3) NOT NULL REFERENCES p_reprezentante(cod),
+    cod_drr NUMBER(4) REFERENCES p_angajati(cod)
+);
+
+-- Populate
+INSERT ALL
+    INTO p_angajati VALUES (3515, 'Zimmermann', 'Lucas', 2500, TO_DATE('20/04/2023', 'DD/MM/YYYY'), 'Parttime', NULL, 'CHARL', 'MAO', NULL)
+    INTO p_angajati VALUES (2514, 'Lemoine', 'Emilie', 7500, TO_DATE('15/04/2017', 'DD/MM/YYYY'), 'Fulltime', 1500, 'CHAL', 'MAO', NULL)
+    INTO p_angajati VALUES (6951, 'Fischer', 'Lara', 8600, TO_DATE('16/05/2014', 'DD/MM/YYYY'), 'Fulltime', NULL, 'CHARL', 'ADS', NULL)
+    INTO p_angajati VALUES (5481, 'Berger', 'Mathieu', 9000, TO_DATE('15/07/2018', 'DD/MM/YYYY'), 'Fulltime', 2500, 'BAR', 'MAS', NULL)
+    INTO p_angajati VALUES (5483, 'Wagner', 'Charlotte', 12000, TO_DATE('21/07/2012', 'DD/MM/YYYY'), 'Fulltime', NULL, 'CHAU', 'HMR', NULL)
+    INTO p_angajati VALUES (524, 'Leclerc', 'Sophie', 5000, TO_DATE('15/06/2015', 'DD/MM/YYYY'), 'Fulltime', 700, 'TRO', 'ATA', 3515)
+    INTO p_angajati VALUES (625, 'Muller', 'Thomas', 4800, TO_DATE('20/09/2013', 'DD/MM/YYYY'), 'Fulltime', 600, 'CHAL', 'MAO', 3515)
+    INTO p_angajati VALUES (152, 'Dupont', 'Elise', 1500, TO_DATE('01/10/2024', 'DD/MM/YYYY'), 'Parttime', NULL, 'CHARL', 'ADS', 2514)
+    INTO p_angajati VALUES (854, 'Wagner', 'Julia', 5200, TO_DATE('11/05/2020', 'DD/MM/YYYY'), 'Fulltime', 800, 'BAR', 'MAS', 6951)
+    INTO p_angajati VALUES (325, 'Schmitt', 'Antoine', 4900, TO_DATE('01/03/2019', 'DD/MM/YYYY'), 'Fulltime', NULL, 'CHAU', 'HMR', 6951)
+    INTO p_angajati VALUES (521, 'Lefevre', 'Charlotte', 4700, TO_DATE('12/08/2016', 'DD/MM/YYYY'), 'Fulltime', 600, 'NAN', 'MMR', 5481)
+    INTO p_angajati VALUES (458, 'Dubois', 'Alexandre', 4500, TO_DATE('20/05/2020', 'DD/MM/YYYY'), 'Fulltime', 200, 'MTZ', 'MAR', 5481)
+    INTO p_angajati VALUES (523, 'Meier', 'Klaus', 3500, TO_DATE('07/10/2017', 'DD/MM/YYYY'), 'Fulltime', NULL, 'EPIN', 'VTA', 5483)
+    INTO p_angajati VALUES (515, 'Berger', 'Marie', 4500, TO_DATE('15/10/2023', 'DD/MM/YYYY'), 'Fulltime', NULL, 'COL', 'HRR', 5483)
+    INTO p_angajati VALUES (658, 'Schmidt', 'Lucas', 4000, TO_DATE('25/01/2013', 'DD/MM/YYYY'), 'Fulltime', 1000, 'STRAS', 'BRS', 6951)
+    INTO p_angajati VALUES (254, 'Bernard', 'Margot', 1200, TO_DATE('20/01/2024', 'DD/MM/YYYY'), 'Parttime', NULL, 'MLH', 'HRA', 3515)
+SELECT 1 FROM DUAL;
+
+-- Check
+SELECT * FROM p_angajati;

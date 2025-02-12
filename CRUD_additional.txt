@@ -1,0 +1,186 @@
+-- Activities table to keep logs for new entries in vanzari and clienti
+CREATE TABLE p_activitati (
+    numar NUMBER PRIMARY KEY,
+    actiune VARCHAR(255) NOT NULL,
+    data_actiune DATE 
+);
+
+
+
+-- Populate clienti
+BEGIN
+    pkg_vanzari.proc_publ_adauga_client(
+        p_cod => 57962,
+        p_persoana => 'fizica',
+        p_nume => 'Dubois',
+        p_prenume => 'Camille',
+        p_email => 'camille.dubois@yahoo.fr',
+        p_adresa => '16 Rue de la Monnaie',
+        p_nr_telefon => '+33654321098',
+        p_cod_postal => '10000',
+        p_cod_ors => 'TRO'
+    );
+
+    pkg_vanzari.proc_publ_adauga_client(
+        p_cod => 12567,
+        p_persoana => 'juridica',
+        p_nume => 'Martin',
+        p_prenume => 'Lea',
+        p_email => 'martin.lea83@gmail.com',
+        p_adresa => '1 Place de la Cathedrale',
+        p_nr_telefon => '+33187654321',
+        p_cod_postal => '68000',
+        p_cod_ors => 'COL'
+    );
+
+    pkg_vanzari.proc_publ_adauga_client(
+        p_cod => 56324,
+        p_persoana => 'juridica',
+        p_nume => 'Leroy',
+        p_prenume => 'Antoine',
+        p_email => 'leroyantoine@yahoo.fr',
+        p_adresa => '2 Rue des Hallebardes',
+        p_nr_telefon => '+33921436587',
+        p_cod_postal => '67000',
+        p_cod_ors => 'STRAS'
+    );
+
+    pkg_vanzari.proc_publ_adauga_client(
+        p_cod => 59135,
+        p_persoana => 'fizica',
+        p_nume => 'Dubois',
+        p_prenume => 'Charlotte',
+        p_email => 'charl_dubois_94@outlook.com',
+        p_adresa => '26 Place Ducale',
+        p_nr_telefon => '+33298765432',
+        p_cod_postal => '80000',
+        p_cod_ors => 'EPIN'
+    );
+
+    pkg_vanzari.proc_publ_adauga_client(
+        p_cod => 68523,
+        p_persoana => 'fizica',
+        p_nume => 'Rousseau',
+        p_prenume => 'Manon',
+        p_email => 'manonr.ouss@mail.com',
+        p_adresa => '9 Rue des Etats-Unis',
+        p_nr_telefon => '+33164857925',
+        p_cod_postal => '88000',
+        p_cod_ors => 'EPIN'
+    );
+
+    pkg_vanzari.proc_publ_adauga_client(
+        p_cod => 48756,
+        p_persoana => 'juridica',
+        p_nume => 'Lefevre',
+        p_prenume => 'Louis',
+        p_email => 'louis-lefevre@gmail.com',
+        p_adresa => '1 Rue des Francs-Burgeois',
+        p_nr_telefon => '+33659421875',
+        p_cod_postal => '68100',
+        p_cod_ors => 'MLH'
+    );
+END;
+/
+
+-- Check
+SELECT * FROM p_clienti;
+
+-- Check logs
+SELECT * FROM p_activitati WHERE actiune LIKE 'Client adaugat%';
+
+
+
+-- Populate vanzari
+BEGIN
+    pkg_vanzari.proc_publ_inregistrare_vanzare(
+        p_nr_factura => 5246,
+        p_data_ora => TO_DATE('30/04/2024 15:34', 'DD/MM/YYYY HH24:MI'),
+        p_tip_plata => 'Integral',
+        p_reducere => NULL,
+        p_cod_cet => 57962,
+        p_serie_sasiu_aul => 'JSHA4582163542546'
+    );
+
+    pkg_vanzari.proc_publ_inregistrare_vanzare(
+        p_nr_factura => 9863,
+        p_data_ora => TO_DATE('29/04/2024 13:45', 'DD/MM/YYYY HH24:MI'),
+        p_tip_plata => 'Rate',
+        p_reducere => NULL,
+        p_cod_cet => 12567,
+        p_serie_sasiu_aul => 'ASDW5496825643520'
+    );
+
+    pkg_vanzari.proc_publ_inregistrare_vanzare(
+        p_nr_factura => 7852,
+        p_data_ora => TO_DATE('15/07/2023 14:08', 'DD/MM/YYYY HH24:MI'),
+        p_tip_plata => 'Rate',
+        p_reducere => 0.1,
+        p_cod_cet => 56324,
+        p_serie_sasiu_aul => 'ODUE4592635978421'
+    );
+
+    pkg_vanzari.proc_publ_inregistrare_vanzare(
+        p_nr_factura => 9052,
+        p_data_ora => TO_DATE('14/03/2023 15:09', 'DD/MM/YYYY HH24:MI'),
+        p_tip_plata => 'Integral',
+        p_reducere => NULL,
+        p_cod_cet => 59135,
+        p_serie_sasiu_aul => 'AOSD1245649865320'
+    );
+
+    pkg_vanzari.proc_publ_inregistrare_vanzare(
+        p_nr_factura => 1002,
+        p_data_ora => TO_DATE('21/12/2023 18:00', 'DD/MM/YYYY HH24:MI'),
+        p_tip_plata => 'Rate',
+        p_reducere => 0.05,
+        p_cod_cet => 68523,
+        p_serie_sasiu_aul => 'AORJ5246358154692'
+    );
+
+    pkg_vanzari.proc_publ_inregistrare_vanzare(
+        p_nr_factura => 9053,
+        p_data_ora => TO_DATE('23/02/2024 16:02', 'DD/MM/YYYY HH24:MI'),
+        p_tip_plata => 'Integral',
+        p_reducere => NULL,
+        p_cod_cet => 48756,
+        p_serie_sasiu_aul => 'OVUY4857962352501'
+    );
+
+    pkg_vanzari.proc_publ_inregistrare_vanzare(
+        p_nr_factura => 5982,
+        p_data_ora => TO_DATE('14/09/2022 15:51', 'DD/MM/YYYY HH24:MI'),
+        p_tip_plata => 'Rate',
+        p_reducere => NULL,
+        p_cod_cet => 12567,
+        p_serie_sasiu_aul => 'NMTD5485936482514'
+    );
+
+    pkg_vanzari.proc_publ_inregistrare_vanzare(
+        p_nr_factura => 5000,
+        p_data_ora => TO_DATE('13/05/2023 16:01', 'DD/MM/YYYY HH24:MI'),
+        p_tip_plata => 'Integral',
+        p_reducere => 0.15,
+        p_cod_cet => 59135,
+        p_serie_sasiu_aul => 'PIII8549652365022'
+    );
+
+    pkg_vanzari.proc_publ_inregistrare_vanzare(
+        p_nr_factura => 9782,
+        p_data_ora => TO_DATE('04/12/2023 09:54', 'DD/MM/YYYY HH24:MI'),
+        p_tip_plata => 'Rate',
+        p_reducere => NULL,
+        p_cod_cet => 12567,
+        p_serie_sasiu_aul => 'PGIR4582165982365'
+    );
+END;
+/
+
+-- Check vanzari
+SELECT * FROM p_vanzari;
+
+-- Check status for autovehicule for change
+SELECT serie_sasiu, model_auto, status FROM p_autovehicule;
+
+-- Check logs
+SELECT * FROM p_activitati WHERE actiune LIKE 'Vanzare%';

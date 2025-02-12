@@ -1,0 +1,51 @@
+-- Generate sales report
+DECLARE 
+    v_raport VARCHAR(4000); -- variable for the sales report
+BEGIN
+    v_raport := pkg_vanzari.func_publ_raport_vanzari; -- store the output of the function in the variable
+    DBMS_OUTPUT.PUT_LINE(v_raport); -- print the result
+END;
+/
+
+-- Compare with a manual query 
+SELECT p_reprezentante.cod AS reprezentanta,
+       COUNT(*) AS numar_vanzari, -- get the total number of sales
+       SUM(p_autovehicule.pret_vanzare) AS total_vanzari -- sum them up
+FROM p_vanzari
+JOIN p_autovehicule ON p_vanzari.serie_sasiu_aul = p_autovehicule.serie_sasiu -- join vanzari with autovehicule
+JOIN p_reprezentante ON p_autovehicule.cod_rpa = p_reprezentante.cod -- join autovehicule with reprezentante
+GROUP BY p_reprezentante.cod; -- group by reprezentante
+
+
+
+-- Display client's purchase history
+DECLARE
+    v_cursor SYS_REFCURSOR; -- cursor that stores the result set
+    v_model_auto VARCHAR2(255); 
+    v_pret_vanzare NUMBER;
+    v_data_ora DATE;
+BEGIN
+    v_cursor := pkg_vanzari.func_publ_istoric_client(p_cod_client => 56324); -- store func output in the cursor
+                                                                             -- call func for client 56324
+    LOOP
+        FETCH v_cursor INTO v_model_auto, v_pret_vanzare, v_data_ora; -- put data from cursor into variables
+        EXIT WHEN v_cursor%NOTFOUND; -- end when no more data is found
+        DBMS_OUTPUT.PUT_LINE('Model: ' || v_model_auto || ', Pret: ' || v_pret_vanzare || ', Data: ' || v_data_ora);
+    END LOOP;
+    CLOSE v_cursor; -- close cursor after processing is done
+END;
+/
+
+-- Compare with a manual query 
+SELECT 
+    p_autovehicule.model_auto, 
+    p_autovehicule.pret_vanzare, 
+    p_vanzari.data_ora 
+FROM p_vanzari
+JOIN p_autovehicule ON p_vanzari.serie_sasiu_aul = p_autovehicule.serie_sasiu -- join vanzari with autovehicule
+WHERE p_vanzari.cod_cet = 56324;
+
+
+
+-- Check activities log
+SELECT * FROM p_activitati ORDER BY data_actiune DESC;

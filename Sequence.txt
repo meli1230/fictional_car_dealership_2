@@ -1,0 +1,5 @@
+-- Sequence to auto-increement the id for the p_activitati table
+CREATE SEQUENCE seq_activitati
+    START WITH 1
+    INCREMENT BY 1;
+/

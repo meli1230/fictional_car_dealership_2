@@ -1,0 +1,233 @@
+-- PACKAGE SPECIFICATION
+--    - interface of the package 
+--    - declares the public elements (variables, procedures, and functions) that other DB objects can access
+--    - hides the implementation details (which can be found in the package body)
+
+CREATE OR REPLACE PACKAGE pkg_vanzari IS
+    -- Public global variable
+    glob_var VARCHAR2(10);
+
+    -- Public procedure 1
+    PROCEDURE proc_publ_adauga_client ( 
+        p_cod IN NUMBER,
+        p_persoana IN VARCHAR2,
+        p_nume IN VARCHAR2,
+        p_prenume IN VARCHAR2,
+        p_email IN VARCHAR2,
+        p_adresa IN VARCHAR2,
+        p_nr_telefon IN VARCHAR2,
+        p_cod_postal IN VARCHAR2,
+        p_cod_ors IN VARCHAR2
+    );
+
+    -- Public procedure 2
+    PROCEDURE proc_publ_inregistrare_vanzare (
+        p_nr_factura IN NUMBER,
+        p_data_ora IN DATE,
+        p_tip_plata IN CHAR,
+        p_reducere IN NUMBER,
+        p_cod_cet IN NUMBER,
+        p_serie_sasiu_aul IN VARCHAR2
+    );
+
+    -- Public function 1
+    FUNCTION func_publ_raport_vanzari RETURN VARCHAR2;
+
+    -- Public function 2
+    FUNCTION func_publ_istoric_client(p_cod_client IN NUMBER) RETURN SYS_REFCURSOR;
+END pkg_vanzari;
+/
+
+
+
+-- PACKAGE BODY
+--    - implements the logic for the public procedures and functions declared in the package specification
+--    - defines private procedures and functions, which are internal to the package and cannot be accessed from outside
+--    - utilizes these private procedures and functions to perform reusable internal tasks, ensuring modularity and encapsulation
+--    - uses cursors, triggers, and sequences to handle complex operations
+
+CREATE OR REPLACE PACKAGE BODY pkg_vanzari IS
+    
+    -- Private procedure 1: logs an action to the activity log table
+    PROCEDURE proc_priv_inregistreaza_activitate(p_actiune IN VARCHAR2) IS -- logs activity description in the table
+    BEGIN
+        INSERT INTO p_activitati(numar, actiune, data_actiune) VALUES -- insert a new record into the activitati table
+        (
+            seq_activitati.NEXTVAL, -- sequence used to generate a unique ID
+            p_actiune, -- activitiy description passed as parameter
+            SYSDATE -- current date
+        );
+    END proc_priv_inregistreaza_activitate;
+
+
+    -- Private procedure 2: updates the stock for a sold vehicle
+    PROCEDURE proc_priv_actualizeaza_stoc_id(p_serie_sasiu IN VARCHAR2) IS
+    BEGIN
+        UPDATE p_autovehicule 
+        SET status = 'vandut'
+        WHERE serie_sasiu = p_serie_sasiu;
+
+        IF SQL%ROWCOUNT = 0 THEN -- if no rows have been updated, raise a user defined error
+            RAISE_APPLICATION_ERROR(-20001, 'Masina cu seria ' || p_serie_sasiu || ' nu este disponibila.'); -- signal that the car has already been sold
+        END IF;
+    END proc_priv_actualizeaza_stoc_id;
+
+
+    -- Private function: calculates the total sales
+    FUNCTION func_priv_calculeaza_total_vanzari RETURN NUMBER IS 
+        total_vanzari NUMBER;
+    BEGIN
+        -- use implicit cursor
+        SELECT SUM(p_autovehicule.pret_vanzare) -- calculate total sum of all sales
+        INTO total_vanzari
+        FROM p_vanzari
+        JOIN p_autovehicule ON p_vanzari.serie_sasiu_aul = p_autovehicule.serie_sasiu;
+        RETURN total_vanzari;
+    END func_priv_calculeaza_total_vanzari;
+
+
+    -- Public procedure 1: adds a client to the database
+    PROCEDURE proc_publ_adauga_client (
+        p_cod IN NUMBER,
+        p_persoana IN VARCHAR2,
+        p_nume IN VARCHAR2,
+        p_prenume IN VARCHAR2,
+        p_email IN VARCHAR2,
+        p_adresa IN VARCHAR2,
+        p_nr_telefon IN VARCHAR2,
+        p_cod_postal IN VARCHAR2,
+        p_cod_ors IN VARCHAR2) IS
+    BEGIN 
+        INSERT INTO p_clienti(
+            cod, 
+            persoana,
+            nume, 
+            prenume,
+            email,
+            adresa,
+            nr_telefon,
+            cod_postal,
+            cod_ors
+            ) 
+        VALUES ( 
+            p_cod,
+            p_persoana,
+            p_nume,
+            p_prenume,
+            p_email,
+            p_adresa,
+            p_nr_telefon,
+            p_cod_postal,
+            p_cod_ors
+        );
+        -- private proc 1 called within public procedure
+        proc_priv_inregistreaza_activitate('Client adaugat: ' || p_cod || ' ' || p_nume || ' ' || p_prenume); -- log the addition of the client
+    END proc_publ_adauga_client;
+
+
+    -- Public procedure 2: registers a sale
+    PROCEDURE proc_publ_inregistrare_vanzare (
+        p_nr_factura IN NUMBER,
+        p_data_ora IN DATE,
+        p_tip_plata IN CHAR,
+        p_reducere IN NUMBER,
+        p_cod_cet IN NUMBER,
+        p_serie_sasiu_aul IN VARCHAR2) IS
+
+        -- explicit cursor with parameters decalration
+        CURSOR c_autovehicule_by_status(p_status IN VARCHAR2, p_serie IN VARCHAR2) IS -- define cursor with 2 input parameters
+            SELECT serie_sasiu -- data I want to be retrieved from the autovehicule table
+            FROM p_autovehicule
+            WHERE status = p_status AND serie_sasiu = p_serie; -- filter by status and serie_sasiu
+
+        serie_sasiu p_autovehicule.serie_sasiu%TYPE; -- variable to store serie_sasiu
+
+    BEGIN
+        -- global variable initialization
+        glob_var := '! :)';
+
+        -- explicit cursor with parameters usage
+        OPEN c_autovehicule_by_status('in stoc', p_serie_sasiu_aul); -- start the cursor and run the query defined for the cursor
+        FETCH c_autovehicule_by_status INTO serie_sasiu; -- get the result of the query and store it into serie_sasiu
+        CLOSE c_autovehicule_by_status; -- close cursor
+
+        IF serie_sasiu IS NULL THEN 
+            RAISE_APPLICATION_ERROR(-20002, 'Masina cu seria ' || p_serie_sasiu_aul || ' nu este disponibila.');
+        END IF;
+
+        -- call of private procedure to update status
+        proc_priv_actualizeaza_stoc_id(serie_sasiu);
+
+        INSERT INTO p_vanzari (
+            nr_factura,
+            data_ora,
+            tip_plata,
+            reducere,
+            cod_cet,
+            serie_sasiu_aul) 
+        VALUES (
+            p_nr_factura,
+            p_data_ora,
+            p_tip_plata,
+            p_reducere,
+            p_cod_cet,
+            p_serie_sasiu_aul
+        );
+        -- private procedure called within public procedure for a second time
+        -- use of global variable
+        proc_priv_inregistreaza_activitate('Vanzare ' || p_nr_factura || ' inregistrata pentru client ' || p_cod_cet || glob_var); -- log activity
+    END proc_publ_inregistrare_vanzare;
+
+
+    -- Public function 1: generates a sales report
+    FUNCTION func_publ_raport_vanzari RETURN VARCHAR2 IS
+        -- explicit cursor withou parameters
+        -- multiple cursor ?
+        CURSOR c_vanzari IS -- cursor definition
+            SELECT 
+                p_reprezentante.cod, 
+                COUNT(*) AS numar_vanzari, -- total number of sales for each reprezentanta
+                SUM(p_autovehicule.pret_vanzare)  -- total value of sales
+                AS total_vanzari 
+            FROM p_vanzari
+            JOIN p_autovehicule ON p_vanzari.serie_sasiu_aul = p_autovehicule.serie_sasiu
+            JOIN p_reprezentante ON p_autovehicule.cod_rpa = p_reprezentante.cod
+            GROUP BY p_reprezentante.cod;
+
+        rezultat VARCHAR2(4000) := 'Raport vanzari: '; -- store the sales report into the variable rezultat and add a title to it
+        cod_reprezentanta p_reprezentante.cod%TYPE; -- store the ID for the reprezentanta
+        total_vanzari NUMBER; -- store total sales value per reprezanta
+        numar_vanzari NUMBER; -- store number of sales per reprezentanta
+
+    BEGIN
+        OPEN c_vanzari; -- open the cursor
+        LOOP
+            FETCH c_vanzari INTO cod_reprezentanta, numar_vanzari, total_vanzari; -- fetch one row of data from the cursor into the variables
+            EXIT WHEN c_vanzari%NOTFOUND; -- stop when done
+            rezultat := rezultat || CHR(10) || 'Reprezentanta: ' || cod_reprezentanta || ' -- Vanzari: ' || numar_vanzari || ' -- Total: ' || total_vanzari;
+        END LOOP;
+        CLOSE c_vanzari;
+        
+        -- private function called within a public function
+        total_vanzari := func_priv_calculeaza_total_vanzari; -- calculate the overall total sales value
+        rezultat := rezultat || '. Total vanzari generale: ' || total_vanzari; -- add them to the report
+        RETURN rezultat;
+    END func_publ_raport_vanzari;
+
+
+    -- Public function 2: returns purchase history for a client
+    FUNCTION func_publ_istoric_client(p_cod_client IN NUMBER) RETURN SYS_REFCURSOR IS -- take cod client as param and returns a cursor (pointer to a query result set)
+                                                                                      -- returns multiple rows of data 
+        c_cursor SYS_REFCURSOR; -- declare SYSREFCURSOR variable to store the result set
+
+    BEGIN
+        OPEN c_cursor FOR -- execute the query that retrieves data into the cursor
+            SELECT p_autovehicule.model_auto, p_autovehicule.pret_vanzare, p_vanzari.data_ora 
+            FROM p_vanzari
+            JOIN p_autovehicule ON p_vanzari.serie_sasiu_aul = p_autovehicule.serie_sasiu
+            WHERE p_vanzari.cod_cet = p_cod_client;
+        RETURN c_cursor; -- return the cursor
+    END func_publ_istoric_client;
+
+END pkg_vanzari;
+/

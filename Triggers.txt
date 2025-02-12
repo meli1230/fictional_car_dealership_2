@@ -1,0 +1,21 @@
+-- Automatically assign a date to each log before inserting it into the activitati table
+CREATE OR REPLACE TRIGGER trg_activitati_timestamp
+    BEFORE INSERT ON p_activitati 
+    FOR EACH ROW
+BEGIN
+    :NEW.data_actiune := SYSDATE; -- assign current date to the log, into the data_actiune field
+END;
+/
+
+
+
+-- Autoincrement primary key for activity_log
+CREATE OR REPLACE TRIGGER trg_activitati_id
+    BEFORE INSERT ON p_activitati
+    FOR EACH ROW
+BEGIN
+    IF :NEW.numar IS NULL THEN
+        :NEW.numar := seq_activitati.NEXTVAL; -- assign next id for the new entry, using the created sequence
+    END IF;
+END;
+/
